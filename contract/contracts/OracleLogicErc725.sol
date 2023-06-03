@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract UseOracleNft is ERC721URIStorage, ChainlinkClient, Ownable {
+contract OracleLogicErc725 is ERC721URIStorage, ChainlinkClient, Ownable {
     using Chainlink for Chainlink.Request;
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -55,7 +55,7 @@ contract UseOracleNft is ERC721URIStorage, ChainlinkClient, Ownable {
         getMetaJobId = id;
     }
 
-    function createGetMetaRequestTo()
+    function createGetRequestTo()
         public
         payable
         onlyOwner
@@ -86,8 +86,6 @@ contract UseOracleNft is ERC721URIStorage, ChainlinkClient, Ownable {
         uint256 _tokenId = requestIdToTokenId[requestId];
         currentTimestamp = _timestamp;
         //Oracleからの返り値によって処理を制御する（NFT発行 or トークン返却）
-        //nftMetadata = _token_url;
-        //_setTokenURI(_tokenId, _token_url);
     }
 
     function cancelRequest(

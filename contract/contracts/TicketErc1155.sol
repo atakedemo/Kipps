@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface IOracleLogic {
+    function createGetRequestTo(address _tokenAddress,address _attempteeAddress,uint256 _returnFee) external payable returns (bytes32 requestId);
+}
+
 contract TicketErc1155 is ERC1155 {
 
     address public contractOwner;
@@ -98,12 +102,17 @@ contract TicketErc1155 is ERC1155 {
         _burn(msg.sender, _ticketId, 1);
         // ID=1のチケットのMint
         _mint(msg.sender, _ticketId + 1, 1, "");
-        // Oracleを参照し、登録されているなら実行
-        /*
+        // Oracleが登録されているなら実行
         if (ticketOracleLogic[_ticketId] != address(0)) {
-            
+            address _feeAddress = ticketList[_ticketId].feeAddress;
+            uint256 _feeAmount = ticketList[_ticketId].feeAmount;
+            IERC20 feeToken = IERC20(_feeAddress);
+            feeToken.approve(ticketOracleLogic[_ticketId], _feeAmount / 10);
+
+            address _oracleLogic = ticketOracleLogic[_ticketId];
+            IOracleLogic oracleLogic = IOracleLogic(_oracleLogic);
+            oracleLogic.createGetRequestTo(_feeAddress, msg.sender, _feeAmount / 20);
         }
-        */
     }
 
     //以下、設定系のFunction（イベントの管理者が使うもの）
@@ -118,7 +127,7 @@ contract TicketErc1155 is ERC1155 {
         uint256 _mintLimit
     ) external {
         ticketList[_ticketId].feeAddress = _feeAddress;
-        ticketList[_ticketId].feeAmount = _feeAmount * 10^18;
+        ticketList[_ticketId].feeAmount = _feeAmount * 10 ** 18;
         ticketList[_ticketId].startTime = _startTime;
         ticketList[_ticketId].endTime = _endTime;
         ticketList[_ticketId].eventTime = _eventTime;
@@ -129,13 +138,13 @@ contract TicketErc1155 is ERC1155 {
 
     //チケット別の管理者の設定
     function updateTicketAdmin(uint256 _ticketId, address _newAdmin) external {
-        require(msg.sender != adminList[_ticketId]);
+        require(msg.sender == adminList[_ticketId]);
         adminList[_ticketId] = _newAdmin;
     }
 
     //チケット別のオラクルコントラクトの設定
     function setOracleContract(uint256 _ticketId, address _logicAddress) external {
-        require(msg.sender != adminList[_ticketId]);
+        require(msg.sender == adminList[_ticketId]);
         ticketOracleLogic[_ticketId] = _logicAddress;
     }
 
@@ -151,7 +160,7 @@ contract TicketErc1155 is ERC1155 {
     ) external {
         require(msg.sender == adminList[_ticketId], "You can't withdraw sales (Unauthorized)");
         ticketList[_ticketId].feeAddress = _feeAddress;
-        ticketList[_ticketId].feeAmount = _feeAmount * 10^18;
+        ticketList[_ticketId].feeAmount = _feeAmount * 10 ** 18;
         ticketList[_ticketId].startTime = _startTime;
         ticketList[_ticketId].endTime = _endTime;
         ticketList[_ticketId].eventTime = _eventTime;
@@ -162,7 +171,7 @@ contract TicketErc1155 is ERC1155 {
     function withdrawSales (uint256 _ticketId, uint256 _amount) external {
         require(msg.sender == adminList[_ticketId], "You can't withdraw sales (Unauthorized)");
         require(ticketSales[_ticketId] >= _amount, "Insufficient sales balance");
-        require(block.timestamp <= ticketList[_ticketId].eventTime,"You can't withdraw sales yet (event not start)");
+        require(block.timestamp >= ticketList[_ticketId].eventTime,"You can't withdraw sales yet (event not start)");
         address _feeAddress = ticketList[_ticketId].feeAddress;
         IERC20 feeToken = IERC20(_feeAddress);
         bool success = feeToken.transfer(msg.sender, _amount);
