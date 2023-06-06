@@ -11,11 +11,10 @@ interface IOracleLogic {
 }
 
 contract TicketErc1155 is ERC1155 {
-
     address public contractOwner;
     uint256 public salesPaid;
+    uint256 public ticketCount;
 
-    //チケットの基本情報
     struct Ticket {
         address feeAddress;
         uint256 feeAmount;
@@ -25,18 +24,15 @@ contract TicketErc1155 is ERC1155 {
         uint256 mintLimit;
     }
     mapping (uint256 => Ticket) public ticketList;
-
-    //チケット別の管理者（発行者）管理
     mapping(uint256 => address) public adminList;
-
-    //チケット別の参照先オラクルの設定 *返り値はTrue/False
     mapping (uint256 => address) public ticketOracleLogic;
-
-    //チケット別の売り上げ管理
     mapping (uint256 => uint256) public ticketSales;
 
     string baseMetadataURIPrefix;
     string baseMetadataURISuffix;
+
+    event ticketSet(uint256 ticketId);
+    event ticketMinted(uint256 ticketId);
 
     // コントラクトデプロイ時に１度だけ呼ばれる
     constructor() ERC1155("") {
@@ -44,6 +40,7 @@ contract TicketErc1155 is ERC1155 {
         baseMetadataURISuffix = ".json";
         contractOwner = msg.sender;
         salesPaid = 90;
+        ticketCount = 0;
     }
 
     modifier onlyOwner() {
@@ -94,15 +91,17 @@ contract TicketErc1155 is ERC1155 {
         uint256 tmpTicketSales = ticketSales[_ticketId];
         uint256 payAmount = _feeAmount * salesPaid / 100;
         ticketSales[_ticketId] = tmpTicketSales + payAmount;
+        ticketCount = ticketCount + 1;
+        emit ticketMinted(_ticketId);
     }
 
     //チケット使用
     function useTicket(uint256 _ticketId) external {
-        // ID=0のチケットのBurn
+        // Thicket Not Used(ID=0) => Burn
         _burn(msg.sender, _ticketId, 1);
-        // ID=1のチケットのMint
+        // Thicket Used(ID=1) => Mint
         _mint(msg.sender, _ticketId + 1, 1, "");
-        // Oracleが登録されているなら実行
+        // If Oracle contract is registered, pay back (or Mint sorry NFT).
         if (ticketOracleLogic[_ticketId] != address(0)) {
             address _feeAddress = ticketList[_ticketId].feeAddress;
             uint256 _feeAmount = ticketList[_ticketId].feeAmount;
@@ -134,6 +133,31 @@ contract TicketErc1155 is ERC1155 {
         ticketList[_ticketId].mintLimit = _mintLimit;
         adminList[_ticketId] = msg.sender;
         ticketSales[_ticketId] = 0;
+        ticketCount = ticketCount + 1;
+        emit ticketSet(_ticketId);
+    }
+
+    //チケットの登録
+    function setTicket(
+        uint256 _ticketId,
+        address _feeAddress,
+        uint256 _feeAmount,
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _eventTime,
+        uint256 _mintLimit,
+        address _oracleAddress
+    ) external {
+        ticketList[_ticketId].feeAddress = _feeAddress;
+        ticketList[_ticketId].feeAmount = _feeAmount * 10 ** 18;
+        ticketList[_ticketId].startTime = _startTime;
+        ticketList[_ticketId].endTime = _endTime;
+        ticketList[_ticketId].eventTime = _eventTime;
+        ticketList[_ticketId].mintLimit = _mintLimit;
+        adminList[_ticketId] = msg.sender;
+        ticketSales[_ticketId] = 0;
+        ticketOracleLogic[_ticketId] = _oracleAddress;
+        emit ticketSet(_ticketId);
     }
 
     //チケット別の管理者の設定
@@ -165,6 +189,7 @@ contract TicketErc1155 is ERC1155 {
         ticketList[_ticketId].endTime = _endTime;
         ticketList[_ticketId].eventTime = _eventTime;
         ticketList[_ticketId].mintLimit = _mintLimit;
+        emit ticketSet(_ticketId);
     }
 
     //チケット販売売り上げの引き出し

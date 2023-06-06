@@ -90,14 +90,14 @@ contract OracleLogicErc20 is ChainlinkClient, Ownable {
 
         //Oracleからの返り値によって処理を制御する（NFT発行 or トークン返却）
         result = _result;
-        //if (_result == 1) {
-        address _tokenAddress = requestIdToTicket[requestId].tokenAddress;
-        address _attempteeAddress = requestIdToTicket[requestId].attempteeAddress;
-        address _callerAddress = requestIdToTicket[requestId].callerAddress;
-        uint256 _returnFee = requestIdToTicket[requestId].returnFee;
-        IERC20 _feeToken = IERC20(_tokenAddress);
-        _feeToken.transferFrom(_callerAddress, _attempteeAddress, _returnFee);
-        //}
+        if (_result == 1) {
+            address _tokenAddress = requestIdToTicket[requestId].tokenAddress;
+            address _attempteeAddress = requestIdToTicket[requestId].attempteeAddress;
+            address _callerAddress = requestIdToTicket[requestId].callerAddress;
+            uint256 _returnFee = requestIdToTicket[requestId].returnFee;
+            IERC20 _feeToken = IERC20(_tokenAddress);
+            _feeToken.transferFrom(_callerAddress, _attempteeAddress, _returnFee);
+        }
     }
 
     function cancelRequest(
