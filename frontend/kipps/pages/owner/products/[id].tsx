@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { ChainId, useAddress, useChainId} from '@thirdweb-dev/react';
 const { ethers } = require('ethers');
-import { Network, Alchemy } from "alchemy-sdk";
+import { Network, Alchemy, NftTokenType } from "alchemy-sdk";
 import abiTicketJson from '../../../abi/ticket.json';
 import abiErc20Json from '../../../abi/token.json';
 
@@ -24,10 +24,10 @@ const ProductDetailContent = () => {
   const contractAbi=abiTicketJson.abi;
   const erc20Abi = abiErc20Json.abi;
   const router = useRouter();
-  const { id } = router.query;
-  const [name, setName] = useState('Loading...');
-  const [image, setImage] = useState('');
-  const [discription, setDiscription] = useState('Loading...');
+  let { id } = router.query;
+  const [name, setName] = useState<any>('Loading...');
+  const [image, setImage] = useState<any>('');
+  const [discription, setDiscription] = useState<any>('Loading...');
   const [price, setPrice] = useState(0);
 
   //Control Modal
@@ -39,22 +39,22 @@ const ProductDetailContent = () => {
   };
 
   const fetchTickt = async() => {
-
-    await alchemy.nft
-      .getNftMetadata(
-        "0x4C874CCacA16f482b872Cb323174bc0D3636E3Bb", 
-        id,
-        "ERC1155",
-        0
-      ).then((res)=>{
-        console.log("get!!!");
-        console.log(res.rawMetadata);
-        setName(res.rawMetadata.name);
-        setImage(res.rawMetadata.image);
-        setDiscription(res.rawMetadata.description);
-      });
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
     try {
+      await alchemy.nft
+        .getNftMetadata(
+          "0x4C874CCacA16f482b872Cb323174bc0D3636E3Bb", 
+          id
+        ).then((res)=>{
+          console.log("get!!!");
+          console.log(res.rawMetadata);
+          if(typeof(res.rawMetadata) != 'undefined'){
+            setName(res.rawMetadata.name);
+            setImage(res.rawMetadata.image);
+            setDiscription(res.rawMetadata.description);
+          }
+        });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+    
       const contract = new ethers.Contract(contractAddress,contractAbi,provider);
       const result = await contract.ticketList(id);
       console.log(result)
