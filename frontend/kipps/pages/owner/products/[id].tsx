@@ -38,12 +38,20 @@ const ProductDetailContent = () => {
     router.push('/');
   };
 
+  const handleId = (_id:any) => {
+    if(typeof(_id) == 'number'){
+      return _id
+    } else {
+      return 0;
+    }
+  }
+
   const fetchTickt = async() => {
     try {
       await alchemy.nft
         .getNftMetadata(
           "0x4C874CCacA16f482b872Cb323174bc0D3636E3Bb", 
-          id
+          handleId(id)
         ).then((res)=>{
           console.log("get!!!");
           console.log(res.rawMetadata);

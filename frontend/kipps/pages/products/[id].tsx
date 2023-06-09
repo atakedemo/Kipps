@@ -24,9 +24,9 @@ const ProductDetailContent = () => {
   const erc20Abi = abiErc20Json.abi;
   const router = useRouter();
   const { id } = router.query;
-  const [name, setName] = useState('Loading...');
-  const [image, setImage] = useState('');
-  const [discription, setDiscription] = useState('Loading...');
+  const [name, setName] = useState<any>('Loading...');
+  const [image, setImage] = useState<any>('');
+  const [discription, setDiscription] = useState<any>('Loading...');
   const [price, setPrice] = useState(0);
 
   //Control Modal
@@ -37,20 +37,28 @@ const ProductDetailContent = () => {
     router.push('/');
   };
 
+  const handleId = (_id:any) => {
+    if(typeof(_id) == 'number'){
+      return _id
+    } else {
+      return 0;
+    }
+  }
+
   const fetchTickt = async() => {
     await alchemy.nft
       .getNftMetadata(
         "0x4C874CCacA16f482b872Cb323174bc0D3636E3Bb", 
-        id,
-        "ERC1155",
-        0
+        handleId(id)
       )
       .then((res)=>{
         console.log("get!!!");
         console.log(res.rawMetadata);
-        setName(res.rawMetadata.name);
-        setImage(res.rawMetadata.image);
-        setDiscription(res.rawMetadata.description);
+        if(typeof(res.rawMetadata) != 'undefined'){
+          setName(res.rawMetadata.name);
+          setImage(res.rawMetadata.image);
+          setDiscription(res.rawMetadata.description);
+        }
       });
     
     const provider = new ethers.providers.Web3Provider(window.ethereum);
