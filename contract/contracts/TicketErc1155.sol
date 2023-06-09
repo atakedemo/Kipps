@@ -91,7 +91,6 @@ contract TicketErc1155 is ERC1155 {
         uint256 tmpTicketSales = ticketSales[_ticketId];
         uint256 payAmount = _feeAmount * salesPaid / 100;
         ticketSales[_ticketId] = tmpTicketSales + payAmount;
-        ticketCount = ticketCount + 1;
         emit ticketMinted(_ticketId);
     }
 
@@ -114,8 +113,7 @@ contract TicketErc1155 is ERC1155 {
         }
     }
 
-    //以下、設定系のFunction（イベントの管理者が使うもの）
-    //チケットの登録
+    //Register new ticket
     function setTicket(
         uint256 _ticketId,
         address _feeAddress,
@@ -158,6 +156,7 @@ contract TicketErc1155 is ERC1155 {
         ticketSales[_ticketId] = 0;
         ticketOracleLogic[_ticketId] = _oracleAddress;
         emit ticketSet(_ticketId);
+        ticketCount = ticketCount + 1;
     }
 
     //チケット別の管理者の設定
