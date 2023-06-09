@@ -41,15 +41,16 @@ const ProductDetailContent = () => {
     if(typeof(_id) == 'number'){
       return _id
     } else {
-      return 0;
+      return 30;
     }
   }
 
   const fetchTickt = async() => {
+    const _id = handleId(id);
     await alchemy.nft
       .getNftMetadata(
         "0x4C874CCacA16f482b872Cb323174bc0D3636E3Bb", 
-        handleId(id)
+        _id
       )
       .then((res)=>{
         console.log("get!!!");
