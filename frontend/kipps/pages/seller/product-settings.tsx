@@ -25,7 +25,9 @@ const ProductSettings = () => {
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    setImage(file);
+    if(file){
+      setImage(file)
+    };
   };
 
   const handleSubmit = async () => {
