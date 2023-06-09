@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-kipps-dev-232241-authRole",
+      "UnauthRoleArn": "arn:aws:iam::594175341170:role/amplify-kipps-dev-232241-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::594175341170:role/amplify-kipps-dev-232241-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-kipps-dev-232241-deployment",
+      "UnauthRoleName": "amplify-kipps-dev-232241-unauthRole",
+      "StackName": "amplify-kipps-dev-232241",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:594175341170:stack/amplify-kipps-dev-232241/1a17e850-06d1-11ee-9284-0e1e0dc93631",
+      "AmplifyAppId": "d2x399ywl2wn00"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2x399ywl2wn00",
+          "type": "manual"
+        }
+      }
+    }
+  }
+}

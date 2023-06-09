@@ -113,9 +113,9 @@ const ProductDetailContent = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Minting Complete</ModalHeader>
+            <ModalHeader>Transaction Complete</ModalHeader>
             <ModalBody>
-                Your mint transaction has been successfully completed.
+                Transaction has been successfully completed.
             </ModalBody>
             <ModalFooter>
                 <Button backgroundColor='#8C7370' color='white' onClick={()=>router.push(`/`)}>
